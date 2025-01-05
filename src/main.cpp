@@ -1,43 +1,13 @@
 #include "main.h"
 
-#if SAFETYMONITOR2_ENABLE
-  #define N_SAFETYMONITORS 2
-#else
-  #define N_SAFETYMONITORS 1
-#endif
-
-SafetyMonitor safetymonitor[N_SAFETYMONITORS] = {
-  SafetyMonitor()
-#if SAFETYMONITOR2_ENABLE
-  ,SafetyMonitor()
-#endif
-};
-
-
-#if OBSERVINGCONDITIONS2_ENABLE
-  #define N_OBSERVINGCONDITIONSS 2
-#else
-  #define N_OBSERVINGCONDITIONSS 1
-#endif
-
-ObservingConditions observingconditions[N_OBSERVINGCONDITIONSS] = {
-  ObservingConditions()
-#if OBSERVINGCONDITIONS2_ENABLE
-  ,ObservingConditions()
-#endif
-};
-
-
-
+SafetyMonitor safetymonitor;
+ObservingConditions observingconditions;
 
 WiFiServer tcpServer(TCP_PORT);
 WiFiClient tcpClient;
 
 AlpacaServer alpacaServer("Alpaca_ESP32");
-/*
-Adafruit_BME280 bme;  // I2C
-Adafruit_MLX90614 mlx = Adafruit_MLX90614();
-*/
+
 void setup() {
   // setup serial
   Serial.begin(115200, SERIAL_8N1);
@@ -49,28 +19,22 @@ void setup() {
   //alpacaServer.debug;   // uncoment to get Server messages in Serial monitor
 
   // add devices
-  for(uint8_t i=0; i<N_SAFETYMONITORS; i++) {
-    safetymonitor[i].begin();
-    alpacaServer.addDevice(&safetymonitor[i]);
-  }
+  safetymonitor.begin();
+  alpacaServer.addDevice(&safetymonitor);
 
-  for(uint8_t i=0; i<N_OBSERVINGCONDITIONSS; i++) {
-    observingconditions[i].begin();
-    alpacaServer.addDevice(&observingconditions[i]);
-  }
-  
+  observingconditions.begin();
+  alpacaServer.addDevice(&observingconditions);
   
   // load settings
   alpacaServer.loadSettings();
-
   meteo1.setup_i2cmlxbme();
 }
   
 void loop() {
   if (millis() > lastTimeRan + measureDelay)  {   // read every measureDelay without blocking Webserver
     meteo1.update_i2cmlxbme(measureDelay);
-    safetymonitor[0].update(meteo1,measureDelay);
-    observingconditions[0].update(meteo1,measureDelay);
+    safetymonitor.update(meteo1,measureDelay);
+    observingconditions.update(meteo1, measureDelay);
     lastTimeRan = millis();
   }
   delay(50); 
