@@ -8,8 +8,8 @@
 #include <ESPmDNS.h>
 
 #include "AlpacaServer.h"
-#include "meteo.h"
-#include "observingconditions.h"
+#include "dome.h"
+#include "switch.h"
 #include "safetymonitor.h"
 
 // weather sensors loop delay
@@ -18,9 +18,4 @@ static unsigned long lastTimeRan;           // a
 
 // module setup
 void setup_wifi();
-
-// module housekeeping
-//void update_i2cmlxbme(unsigned long measureDelay);
-
-Meteo meteo1("AlpacaESP32");
 

@@ -1,16 +1,34 @@
 #include "main.h"
 
-SafetyMonitor safetymonitor;
-ObservingConditions observingconditions;
+Dome domeDevice;
+Switch switchDevice;
+SafetyMonitor safemonDevice;
 
 WiFiServer tcpServer(TCP_PORT);
 WiFiClient tcpClient;
 
 AlpacaServer alpacaServer("Alpaca_ESP32");
 
+uint16_t _shift_reg_in, _shift_reg_out, _prev_shift_reg_out;
+bool _dome_open_button, _dome_close_button, _dome_opened_switch, _dome_closed_switch;
+bool _dome_roof_open, _dome_roof_close;
+
+uint8_t _safemon_inputs;
+
+uint8_t _sw_in[8], _sw_out[8];
+uint8_t _sw_pwm[4];
+uint8_t _sw_pwm_pins[4] = {SR_OUT_PWM0, SR_OUT_PWM1, SR_OUT_PWM2, SR_OUT_PWM3};
+
+uint32_t tmr_LED, tmr_shreg;
+
+uint16_t read_shift_register( void );
+void write_shift_register( uint16_t value );
+void init_IO( void );
+
 void setup() {
   // setup serial
   Serial.begin(115200, SERIAL_8N1);
+  delay(100);
 
   setup_wifi();
 
@@ -19,25 +37,26 @@ void setup() {
   //alpacaServer.debug;   // uncoment to get Server messages in Serial monitor
 
   // add devices
-  safetymonitor.begin();
-  alpacaServer.addDevice(&safetymonitor);
+  domeDevice.Begin();
+  alpacaServer.addDevice(&domeDevice);
 
-  observingconditions.begin();
-  alpacaServer.addDevice(&observingconditions);
+  safemonDevice.Begin();
+  alpacaServer.addDevice(&safemonDevice);
+
+  switchDevice.Begin();
+  alpacaServer.addDevice(&switchDevice);
   
   // load settings
   alpacaServer.loadSettings();
-  meteo1.setup_i2cmlxbme();
 }
   
 void loop() {
-  if (millis() > lastTimeRan + measureDelay)  {   // read every measureDelay without blocking Webserver
-    meteo1.update_i2cmlxbme(measureDelay);
-    safetymonitor.update(meteo1,measureDelay);
-    observingconditions.update(meteo1, measureDelay);
-    lastTimeRan = millis();
-  }
-  delay(50); 
+  
+  domeDevice.Loop();
+  safemonDevice.Loop();
+  switchDevice.Loop();
+
+  delay(1); 
 }
 
 void setup_wifi()
