@@ -5,6 +5,10 @@ SafetyMonitor::SafetyMonitor() : AlpacaSafetyMonitor()
     _is_safe = true;
 }
 
+bool SafetyMonitor::is_connected() {
+	return AlpacaSafetyMonitor::_isconnected;
+}
+
 bool SafetyMonitor::Begin()
 {
     return true;
@@ -35,7 +39,7 @@ void SafetyMonitor::aWriteJson(JsonObject &root)
     obj_config["Rain_delay"] = rain_delay;
     obj_config["Power_delay"] = power_delay;
 
-    JsonObject obj_state  = root["State"].to<JsonObject>();
+    JsonObject obj_state  = root["#States"].to<JsonObject>();
     obj_state["Rain_delay"] = rain_delay;
     obj_state["Power_delay"] = power_delay;
     obj_state["Is_safe"] = _is_safe;

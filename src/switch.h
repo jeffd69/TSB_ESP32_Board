@@ -19,11 +19,6 @@ class Switch : public AlpacaSwitch
 private:
     bool _writeSwitchValue(uint32_t id, uint32_t value);
 
-/*
-    void aPut_SetSwitch(AsyncWebServerRequest *request);
-    void aPut_SetSwitchName(AsyncWebServerRequest *request);
-    void aPut_SetSwitchValue(AsyncWebServerRequest *request);
-*/
     void AlpacaReadJson(JsonObject &root);
     void AlpacaWriteJson(JsonObject &root);
 
@@ -31,4 +26,5 @@ public:
     Switch();
     void Begin();
     void Loop();
+    bool is_connected();
 };

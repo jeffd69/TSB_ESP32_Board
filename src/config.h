@@ -17,11 +17,6 @@
 #define ALPACA_UDP_PORT         32227
 #define ALPACA_TCP_PORT         80
 
-// MLX90614 sensor
-#define SDApin                  22          // Pins at SDA=22 SCL=21. Change them as required
-#define SCLpin                  21
-#define bme_i2caddress          0x76
-
 #define SR_OUT_PIN_OE           15          // 595 shift register output enable
 #define SR_OUT_PIN_STCP         2           // output latch storage clock
 #define SR_OUT_PIN_MR           12          // shift register master reset

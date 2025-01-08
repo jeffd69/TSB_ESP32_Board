@@ -39,6 +39,10 @@ Switch::Switch() : AlpacaSwitch()
   //_p_swtc = AlpacaSwitch::_p_switch_devices;
 }
 
+bool Switch::is_connected() {
+  return AlpacaSwitch::_isconnected;
+}
+
 void Switch::Begin()
 {
 
@@ -85,13 +89,52 @@ bool Switch::_writeSwitchValue(uint32_t id, uint32_t value)
 
 void Switch::AlpacaReadJson(JsonObject &root)
 {
-	AlpacaSwitch::aReadJson(root);
+  AlpacaSwitch::aReadJson(root);
+  char sw_name[aSwitchNameSize];
+
+  if (JsonObject obj_config = root["Configuration"])
+  {
+    for(int i=0; i<_num_of_switch_devices; i++ )
+    {
+      sprintf(sw_name, "Switch_%i", i);
+      // InitSwitchName(i, obj_config["Name"] | GetSwitchName(i));
+      // void InitSwitchName(uint32_t id, const char* name) { strlcpy(_p_switch_devices[id].name, name, kSwitchNameSize ); };
+
+      obj_config[sw_name] | AlpacaSwitch::_p_switch_devices[i].name;
+    }
+
+  }
 }
 
 void Switch::AlpacaWriteJson(JsonObject &root)
 {
-  AlpacaSwitch::aWriteJson(root);
-}
+  int _min, _max, _stp, _val;
 
+  AlpacaSwitch::aWriteJson(root);
+  char sw_name[aSwitchNameSize];
+  char sw_state[aSwitchDescriptionSize];
+
+  // Config
+  JsonObject obj_config = root["Configuration"].to<JsonObject>();
+  for(int i=0; i<_num_of_switch_devices; i++ )
+  {
+    sprintf(sw_name, "Switch_%i", i);
+    obj_config[sw_name] | AlpacaSwitch::_p_switch_devices[i].name;
+  }
+
+  // #add # for read only
+  JsonObject obj_states = root["#States"].to<JsonObject>();
+  for(int i=0; i<_num_of_switch_devices; i++ )
+  {
+    _min = AlpacaSwitch::_p_switch_devices[i].min_value;
+    _max = AlpacaSwitch::_p_switch_devices[i].max_value;
+    _stp = AlpacaSwitch::_p_switch_devices[i].step;
+    _val = AlpacaSwitch::_p_switch_devices[i].value;
+    sprintf(sw_name, "Switch_%i", i);
+    sprintf(sw_state, "%s, %s, min %i, max %i, step %i, value %i", AlpacaSwitch::_p_switch_devices[i].name, 
+      (AlpacaSwitch::_p_switch_devices[i].can_write ? "RW" : "R"), _min, _max, _stp, _val);
+    obj_states[sw_name] = sw_state;
+  }
+}
 
 

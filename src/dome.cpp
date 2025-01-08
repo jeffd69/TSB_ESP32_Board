@@ -5,9 +5,7 @@
 
   Description:    Dome Device implementation
 **************************************************************************************************/
-#include "Dome.h"
-
-//const char *const Dome::aShutterStatusStr[5] = {"OPEN", "CLOSED", "OPENING", "CLOSING", "ERROR"};
+#include "dome.h"
 
 Dome::Dome() : AlpacaDome()
 {
@@ -19,9 +17,9 @@ void Dome::Begin()
 	// init shutter status
 	if( _use_switch )
 	{
-		if( _dome_closed_switch )
+		if( _dome_switch_closed )
 			_shutter = AlpacaShutterStatus_t::aClosed;
-		else if( _dome_opened_switch )
+		else if( _dome_switch_opened )
 			_shutter = AlpacaShutterStatus_t::aOpen;
 		else
 			_shutter = AlpacaShutterStatus_t::aError;
@@ -44,25 +42,25 @@ void Dome::Loop()
 			_slew = false;
 			_timer_ini = 0;
 			_timer_end = 0;
-			_dome_roof_close = false;							// turn relays OFF
-			_dome_roof_open = false;
+			_dome_relay_close = false;							// turn relays OFF
+			_dome_relay_open = false;
 			return;
 		}
 
-		if(( _shutter == AlpacaShutterStatus_t::aOpening ) && ( _dome_opened_switch ))
+		if(( _shutter == AlpacaShutterStatus_t::aOpening ) && ( _dome_switch_opened ))
 		{
 			_shutter == AlpacaShutterStatus_t::aOpen;
 			_slew = false;
-			_dome_roof_close = false;		// turn relays OFF
-			_dome_roof_open = false;
+			_dome_relay_close = false;		// turn relays OFF
+			_dome_relay_open = false;
 		}
 		
-		if(( _shutter == AlpacaShutterStatus_t::aClosing ) && ( _dome_closed_switch ))
+		if(( _shutter == AlpacaShutterStatus_t::aClosing ) && ( _dome_switch_closed ))
 		{
 			_shutter == AlpacaShutterStatus_t::aClosed;
 			_slew = false;
-			_dome_roof_close = false;		// turn relays OFF
-			_dome_roof_open = false;
+			_dome_relay_close = false;		// turn relays OFF
+			_dome_relay_open = false;
 		}
 	}
 	else
@@ -71,54 +69,58 @@ void Dome::Loop()
 		{
 			_shutter == AlpacaShutterStatus_t::aOpen;
 			_slew = false;
-			_dome_roof_close = false;		// turn relays OFF
-			_dome_roof_open = false;
+			_dome_relay_close = false;		// turn relays OFF
+			_dome_relay_open = false;
 		}
 		
 		if(( _shutter == AlpacaShutterStatus_t::aClosing ) && ( millis() > _timer_end ))
 		{
 			_shutter == AlpacaShutterStatus_t::aClosed;
 			_slew = false;
-			_dome_roof_close = false;		// turn relays OFF
-			_dome_roof_open = false;
+			_dome_relay_close = false;		// turn relays OFF
+			_dome_relay_open = false;
 		}
 	}
 }
 
+bool Dome::is_connected() {
+	return AlpacaDome::_isconnected;
+}
+
 const bool Dome::_putAbort()	// stops shutter motor, sets _shutter to error, set _slew to false
 {
-    AlpacaDome::_shutter_state = AlpacaShutterStatus_t::aError;
-    AlpacaDome::_slewing = false;
+    _shutter = AlpacaShutterStatus_t::aError;
+    _slew = false;
 	
 	_timer_ini = 0;
 	_timer_end = 0;
 
-	_dome_roof_close = false;		// turn relays OFF
-	_dome_roof_open = false;
+	_dome_relay_close = false;		// turn relays OFF
+	_dome_relay_open = false;
 	
 	return true;
 }
 
 const bool Dome::_putClose()
 {
-    if( AlpacaDome::_shutter_state == AlpacaShutterStatus_t::aOpening )
+    if( _shutter == AlpacaShutterStatus_t::aOpening )
 	{
 		return false;
 	}
-	else if( AlpacaDome::_shutter_state == AlpacaShutterStatus_t::aClosing )
+	else if( _shutter == AlpacaShutterStatus_t::aClosing )
 	{
 		return true;
 	}
 	else
 	{
-		AlpacaDome::_slewing = true;
-		AlpacaDome::_shutter_state = AlpacaShutterStatus_t::aClosing;
+		_slew = true;
+		_shutter = AlpacaShutterStatus_t::aClosing;
 		
 		_timer_ini = millis();
 		_timer_end = _timer_ini + _timeout * 1000;
 
-		_dome_roof_close = true;		// turn close relays ON
-		_dome_roof_open = false;		// turn open relays OFF
+		_dome_relay_close = true;		// turn close relays ON
+		_dome_relay_open = false;		// turn open relays OFF
 	}
 	
 	return true;
@@ -126,24 +128,24 @@ const bool Dome::_putClose()
 
 const bool Dome::_putOpen()
 {
-    if( AlpacaDome::_shutter_state == AlpacaShutterStatus_t::aClosing )
+    if( _shutter == AlpacaShutterStatus_t::aClosing )
 	{
 		return false;
 	}
-	else if( AlpacaDome::_shutter_state == AlpacaShutterStatus_t::aOpening )
+	else if( _shutter == AlpacaShutterStatus_t::aOpening )
 	{
 		return true;
 	}
 	else
 	{
-		AlpacaDome::_slewing = true;
-		AlpacaDome::_shutter_state = AlpacaShutterStatus_t::aOpening;
+		_slew = true;
+		_shutter = AlpacaShutterStatus_t::aOpening;
 		
 		_timer_ini = millis();
 		_timer_end = _timer_ini + _timeout * 1000;
 
-		_dome_roof_close = false;		// turn close relays OFF
-		_dome_roof_open = true;			// turn open relays ON
+		_dome_relay_close = false;		// turn close relays OFF
+		_dome_relay_open = true;			// turn open relays ON
 	}
 	
 	return true;
@@ -164,15 +166,13 @@ void Dome::AlpacaReadJson(JsonObject &root)
 {
 	AlpacaDome::aReadJson(root);
 
-	if (JsonObject obj_config = root["DomeConfiguration"])
+	if (JsonObject obj_config = root["Configuration"])
 	{
-		bool _us = obj_config["Use limit switches"] | _use_switch;
-		int32_t _to = obj_config["Shutter timeout"] | _timeout;
-		int32_t _oc = obj_config["Extend closing"] | _overclose;
+		bool _us = obj_config["Use_limit_switches"] | _use_switch;
+		int32_t _to = obj_config["Shutter_timeout"] | _timeout;
 
 		_use_switch = _us;
 		_timeout = _to;
-		_overclose = _oc;
 
 	}
 }
@@ -182,16 +182,14 @@ void Dome::AlpacaWriteJson(JsonObject &root)
     AlpacaDome::aWriteJson(root);
 
     // Config
-    JsonObject obj_config = root["DomeConfiguration"].to<JsonObject>();
+    JsonObject obj_config = root["Configuration"].to<JsonObject>();
     obj_config["Use_limit_switches"] = _use_switch;
     obj_config["Shutter_timeout"] = _timeout;
-	obj_config["Extend_closing"] = _overclose;
 
     // #add # for read only
     JsonObject obj_states = root["#States"].to<JsonObject>();
-    obj_states["Shutter"] = k_shutter_state_str[(int)_shutter];
+    obj_states["Shutter"] = AlpacaDome::aShutterStatusStr[(int)_shutter];
 	obj_states["Use_limit_switches"] = (_use_switch ? "true" : "false");
     obj_states["Shutter_timeout"] = _timeout;
-	obj_states["Extend_closing"] = _overclose;
 }
 
