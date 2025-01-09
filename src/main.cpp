@@ -33,15 +33,7 @@ void setup() {
   init_IO();
   delay(100);
 
-  g_Slog.Begin(Serial, 115200);
-  SLOG_NOTICE_PRINTF("SLog started\n");
-
   setup_wifi();
-
-  g_Slog.Begin(alpacaServer.GetSyslogHost().c_str(), 514);  // alpacaServer.GetSyslogHost().c_str());
-  SLOG_INFO_PRINTF("SYSLOG enabled and running log_lvl=%s enable_serial=%s\n", g_Slog.GetLvlMskStr().c_str(), alpacaServer.GetSerialLog() ? "true" : "false"); 
-  g_Slog.SetLvlMsk(alpacaServer.GetLogLvl());
-  g_Slog.SetEnableSerial(alpacaServer.GetSerialLog());
 
   // setup ASCOM Alpaca server
   alpacaServer.begin(ALPACA_UDP_PORT, ALPACA_TCP_PORT);
@@ -56,9 +48,10 @@ void setup() {
 
   switchDevice.Begin();
   alpacaServer.addDevice(&switchDevice);
-  
+
   // load settings
   alpacaServer.loadSettings();
+
 }
   
 void loop() {
@@ -353,7 +346,7 @@ void setup_wifi()
   pinMode(PIN_WIFI_LED, OUTPUT);
 
   // setup wifi
-  Serial.print(F("\n# Starting WiFi"));
+  Serial.println(F("Starting WiFi"));
 
   //DoubleResetDetector drd = DoubleResetDetector(DRD_TIMEOUT, DRD_ADDRESS);
   ESP_WiFiManager ESP_wifiManager(HOSTNAME);
