@@ -30,10 +30,10 @@ void setup() {
   Serial.begin(115200, SERIAL_8N1);
   delay(100);
 
+  setup_wifi();
+
   init_IO();
   delay(100);
-
-  setup_wifi();
 
   // setup ASCOM Alpaca server
   alpacaServer.begin(ALPACA_UDP_PORT, ALPACA_TCP_PORT);
@@ -346,7 +346,7 @@ void setup_wifi()
   pinMode(PIN_WIFI_LED, OUTPUT);
 
   // setup wifi
-  Serial.println(F("Starting WiFi"));
+  Serial.println("Starting WiFi");
 
   //DoubleResetDetector drd = DoubleResetDetector(DRD_TIMEOUT, DRD_ADDRESS);
   ESP_WiFiManager ESP_wifiManager(HOSTNAME);
@@ -357,14 +357,15 @@ void setup_wifi()
     Serial.println(F("# Starting Config Portal"));
     //digitalWrite(PIN_WIFI_LED, HIGH);
     if (!ESP_wifiManager.startConfigPortal()) {
-      Serial.println(F("# Not connected to WiFi"));
+      Serial.println("# Not connected to WiFi");
     } else {
-      Serial.println(F("# connected"));
+      Serial.println("# connected");
     }
   } else {
     WiFi.mode(WIFI_STA);
     WiFi.begin();
-  } 
+  }
+
   WiFi.waitForConnectResult();
   if (WiFi.status() != WL_CONNECTED) {
     Serial.println(F("# Failed to connect"));
@@ -378,4 +379,5 @@ void setup_wifi()
      return;
     }
   }
+  Serial.println(".. end setup_wifi()");
 }

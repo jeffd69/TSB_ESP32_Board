@@ -6,7 +6,6 @@
 #include <ESP_WiFiManager.h>
 //#include <ESP_DoubleResetDetector.h>
 #include <ESPmDNS.h>
-//#include <SLog.h>
 
 #include "AlpacaServer.h"
 #include "dome.h"
