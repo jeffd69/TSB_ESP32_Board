@@ -32,19 +32,19 @@ void Dome::Begin()
 
 void Dome::Loop()
 {
-    // simulation of roof moving and changing status using timer (no limit switches)
-
 	if( _use_switch )
 	{
-		if(( millis() - _timer_ini ) > (_timeout * 1000 ))		// timeout !!!!!!!!!!!
-		{
-			_shutter = AlpacaShutterStatus_t::aError;			// set error status
-			_slew = false;
-			_timer_ini = 0;
-			_timer_end = 0;
-			_dome_relay_close = false;							// turn relays OFF
-			_dome_relay_open = false;
-			return;
+		if((_shutter == AlpacaShutterStatus_t::aOpening) || (_shutter == AlpacaShutterStatus_t::aClosing)) {	// check timout only when slewing
+			if(( millis() - _timer_ini ) > (_timeout * 1000 ))		// timeout error !!!!!!!!!!!
+			{
+				_shutter = AlpacaShutterStatus_t::aError;			// set error status
+				_slew = false;
+				_timer_ini = 0;
+				_timer_end = 0;
+				_dome_relay_close = false;							// turn relays OFF
+				_dome_relay_open = false;
+				return;
+			}
 		}
 
 		if(( _shutter == AlpacaShutterStatus_t::aOpening ) && ( _dome_switch_opened ))
