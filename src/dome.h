@@ -13,6 +13,10 @@ extern bool _dome_relay_open, _dome_relay_close;
 class Dome : public AlpacaDome
 {
 private:
+    static uint8_t _n_domes;
+    static Dome *_dome_array[2];
+    uint8_t _dome_index;
+
 	AlpacaShutterStatus_t _shutter;		// shutter status
 	bool _slew;							// true when shutter is moving
 	bool _use_switch;					// if true, use limit switches, else use timeout

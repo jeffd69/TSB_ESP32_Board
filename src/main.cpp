@@ -1,8 +1,8 @@
 #include "main.h"
 
-Dome domeDevice;
-Switch switchDevice;
-SafetyMonitor safemonDevice;
+Dome domeDevice[] = { Dome() };
+Switch switchDevice[] = { Switch() };
+SafetyMonitor safemonDevice[] = { SafetyMonitor() };
 
 WiFiServer tcpServer(TCP_PORT);
 WiFiClient tcpClient;
@@ -37,17 +37,17 @@ void setup() {
 
   // setup ASCOM Alpaca server
   alpacaServer.begin(ALPACA_UDP_PORT, ALPACA_TCP_PORT);
-  //alpacaServer.debug;   // uncoment to get Server messages in Serial monitor
+  alpacaServer.debug;   // uncoment to get Server messages in Serial monitor
 
   // add devices
-  domeDevice.Begin();
-  alpacaServer.addDevice(&domeDevice);
+  domeDevice[0].Begin();
+  alpacaServer.addDevice(&domeDevice[0]);
 
-  safemonDevice.Begin();
-  alpacaServer.addDevice(&safemonDevice);
+  safemonDevice[0].Begin();
+  alpacaServer.addDevice(&safemonDevice[0]);
 
-  switchDevice.Begin();
-  alpacaServer.addDevice(&switchDevice);
+  switchDevice[0].Begin();
+  alpacaServer.addDevice(&switchDevice[0]);
 
   // load settings
   alpacaServer.loadSettings();
@@ -56,14 +56,14 @@ void setup() {
   
 void loop() {
   
-  domeDevice.Loop();
-  safemonDevice.Loop();
-  switchDevice.Loop();
+  domeDevice[0].Loop();
+  safemonDevice[0].Loop();
+  switchDevice[0].Loop();
 
   if((millis() - tmr_shreg) > 100)                    // read shift register every 100ms
     _shift_reg_in = read_shift_register();
 
-  if( domeDevice.is_connected() )
+  if( domeDevice[0].is_connected() )
   {
     _shift_reg_out |= BIT_DOME;             // Dome connected LED ON
 
@@ -136,7 +136,7 @@ void loop() {
       _shift_reg_out &= ~BIT_ROOF_OPEN;
   }
 
-  if( safemonDevice.is_connected() )
+  if( safemonDevice[0].is_connected() )
   {
     _shift_reg_out |= BIT_SAFEMON;                    // SafetyMonitor connected LED ON
 
@@ -150,7 +150,7 @@ void loop() {
     _safemon_inputs = 0;
   }
 
-  if( switchDevice.is_connected() )
+  if( switchDevice[0].is_connected() )
   {
     uint32_t i;
     uint16_t p;
@@ -362,11 +362,14 @@ void setup_wifi()
       Serial.println("# connected");
     }
   } else {
+    Serial.println("# try STA");
     WiFi.mode(WIFI_STA);
     WiFi.begin();
+    Serial.println("# end STA");
   }
 
   WiFi.waitForConnectResult();
+
   if (WiFi.status() != WL_CONNECTED) {
     Serial.println(F("# Failed to connect"));
   }

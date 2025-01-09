@@ -17,6 +17,10 @@ extern uint8_t _sw_pwm[4];
 class Switch : public AlpacaSwitch
 {
 private:
+    static uint8_t _n_switches;
+    static Switch *_switch_array[2];
+    uint8_t _switch_index;
+
     bool _writeSwitchValue(uint32_t id, uint32_t value);
 
     void AlpacaReadJson(JsonObject &root);
@@ -24,7 +28,7 @@ private:
 
 public:
     Switch();
-    void Begin();
+    bool Begin();
     void Loop();
     bool is_connected();
 };

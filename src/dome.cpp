@@ -7,13 +7,21 @@
 **************************************************************************************************/
 #include "dome.h"
 
+// cannot call member functions directly from interrupt, so need these helpers for up to 1 SafetyMonitor
+uint8_t Dome::_n_domes = 0;
+Dome *Dome::_dome_array[2] = { nullptr,  nullptr };
+
 Dome::Dome() : AlpacaDome()
 {
-	// constructor
+	// 
+	_dome_index = _n_domes++;
 }
+
 
 void Dome::Begin()
 {
+	_dome_array[_dome_index] = this;
+
 	// init shutter status
 	if( _use_switch )
 	{
@@ -187,9 +195,9 @@ void Dome::AlpacaWriteJson(JsonObject &root)
     obj_config["Shutter_timeout"] = _timeout;
 
     // #add # for read only
-    JsonObject obj_states = root["#States"].to<JsonObject>();
-    obj_states["Shutter"] = AlpacaDome::aShutterStatusStr[(int)_shutter];
-	obj_states["Use_limit_switches"] = (_use_switch ? "true" : "false");
-    obj_states["Shutter_timeout"] = _timeout;
+    JsonObject obj_states = root["States"].to<JsonObject>();
+    obj_states["#Shutter"] = AlpacaDome::aShutterStatusStr[(int)_shutter];
+	obj_states["#Use_limit_switches"] = (_use_switch ? "true" : "false");
+    obj_states["#Shutter_timeout"] = _timeout;
 }
 

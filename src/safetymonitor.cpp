@@ -1,8 +1,13 @@
 #include "safetymonitor.h"
 
+// cannot call member functions directly from interrupt, so need these helpers for up to 1 SafetyMonitor
+uint8_t SafetyMonitor::_n_safetymonitors = 0;
+SafetyMonitor *SafetyMonitor::_safetymonitor_array[2] = { nullptr,  nullptr };
+
+
 SafetyMonitor::SafetyMonitor() : AlpacaSafetyMonitor()
 {
-    _is_safe = true;
+    _safetymonitor_index = _n_safetymonitors++;
 }
 
 bool SafetyMonitor::is_connected() {
@@ -11,6 +16,8 @@ bool SafetyMonitor::is_connected() {
 
 bool SafetyMonitor::Begin()
 {
+    _safetymonitor_array[_safetymonitor_index] = this;
+    _is_safe = true;
     return true;
 }
 
@@ -39,9 +46,9 @@ void SafetyMonitor::aWriteJson(JsonObject &root)
     obj_config["Rain_delay"] = rain_delay;
     obj_config["Power_delay"] = power_delay;
 
-    JsonObject obj_state  = root["#States"].to<JsonObject>();
-    obj_state["Rain_delay"] = rain_delay;
-    obj_state["Power_delay"] = power_delay;
-    obj_state["Is_safe"] = _is_safe;
+    JsonObject obj_state  = root["States"].to<JsonObject>();
+    obj_state["#Rain_delay"] = rain_delay;
+    obj_state["#Power_delay"] = power_delay;
+    obj_state["#Is_safe"] = (_is_safe ? "SAFE" : "UNSAFE");
 }
 

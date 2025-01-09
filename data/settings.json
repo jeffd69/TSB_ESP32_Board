@@ -1,0 +1,88 @@
+{
+    "Name": "Alpaca_ESP32",
+    "UID": "2CBCBB0D6EC8",
+    "TCP_port": 80,
+    "UDP_port": 32227,
+    "dome#2CBCBB0D6EC800": {
+      "General": {
+        "Name": "dome-0",
+        "Description": "TSBoard Dome driver",
+        "UID": "dome#2CBCBB0D6EC800"
+      },
+      "Configuration": {
+        "Use_limit_switches": true,
+        "Shutter_timeout": 30
+      },
+      "#States": {
+        "Use_limit_switches": true,
+        "Shutter_timeout": 30
+      }
+    },
+    "safetymonitor#2CBCBB0D6EC800": {
+      "General": {
+        "Name": "safetymonitor-0",
+        "Description": "TSBoard SafetyMonitor driver",
+        "UID": "safetymonitor#2CBCBB0D6EC800"
+      },
+      "Configuration": {
+        "Rain_delay": 2,
+        "Power_delay": 30
+      },
+      "#States": {
+        "Rain_delay": 2,
+        "Power_delay": 30,
+        "Is_safe": true
+      }
+    },
+    "switch#2CBCBB0D6EC800": {
+      "General": {
+        "Name": "switch-0",
+        "Description": "TSBoard Switch driver",
+        "UID": "switch#2CBCBB0D6EC800"
+      },
+      "Configuration": {
+        "Switch_0": "Read only, 1",
+        "Switch_1": "Read only, 2",
+        "Switch_2": "Read only, 3",
+        "Switch_3": "Read only, 4",
+        "Switch_4": "Read only, 5",
+        "Switch_5": "Read only, 6",
+        "Switch_6": "Read only, 7",
+        "Switch_7": "Read only, 8",
+        "Switch_8": "Read/Write, 0",
+        "Switch_9": "Read/Write, 0",
+        "Switch_10": "Read/Write, 0",
+        "Switch_11": "Read/Write, 0",
+        "Switch_12": "Read/Write, 0",
+        "Switch_13": "Read/Write, 0",
+        "Switch_14": "Read/Write, 0",
+        "Switch_15": "Read/Write, 0",
+        "Switch_16": "PWM 1",
+        "Switch_17": "PWM 2",
+        "Switch_18": "PWM 3",
+        "Switch_19": "PWM 4"
+      },
+      "#States": {
+        "Switch_0": "Read only, 0",
+        "Switch_1": "Read only, 1",
+        "Switch_2": "Read only, 1",
+        "Switch_3": "Read only, 0",
+        "Switch_4": "Read only, 0",
+        "Switch_5": "Read only, 0",
+        "Switch_6": "Read only, 1",
+        "Switch_7": "Read only, 0",
+        "Switch_8": "Read/Write, 1",
+        "Switch_9": "Read/Write, 1",
+        "Switch_10": "Read/Write, 0",
+        "Switch_11": "Read/Write, 0",
+        "Switch_12": "Read/Write, 0",
+        "Switch_13": "Read/Write, 0",
+        "Switch_14": "Read/Write, 1",
+        "Switch_15": "Read/Write, 0",
+        "Switch_16": "PWM 0",
+        "Switch_17": "PWM 20",
+        "Switch_18": "PWM 0",
+        "Switch_19": "PWM 0"
+      }
+    }
+  }

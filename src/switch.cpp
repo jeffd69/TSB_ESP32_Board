@@ -7,6 +7,10 @@
 **************************************************************************************************/
 #include "Switch.h"
 
+// cannot call member functions directly from interrupt, so need these helpers for up to 1 SafetyMonitor
+uint8_t Switch::_n_switches = 0;
+Switch *Switch::_switch_array[2] = { nullptr,  nullptr };
+
 const uint32_t _num_of_switch_devices = 20;
 
 SwitchDevice_t init_switch_device[_num_of_switch_devices] = {
@@ -36,16 +40,17 @@ SwitchDevice_t init_switch_device[_num_of_switch_devices] = {
 
 Switch::Switch() : AlpacaSwitch()
 {
-  //_p_swtc = AlpacaSwitch::_p_switch_devices;
+  _switch_index = _n_switches++;
 }
 
 bool Switch::is_connected() {
   return AlpacaSwitch::_isconnected;
 }
 
-void Switch::Begin()
+bool Switch::Begin()
 {
-
+  _switch_array[_switch_index] = this;
+    return true;
 }
 
 void Switch::Loop()
@@ -123,14 +128,14 @@ void Switch::AlpacaWriteJson(JsonObject &root)
   }
 
   // #add # for read only
-  JsonObject obj_states = root["#States"].to<JsonObject>();
+  JsonObject obj_states = root["tates"].to<JsonObject>();
   for(int i=0; i<_num_of_switch_devices; i++ )
   {
     _min = AlpacaSwitch::_p_switch_devices[i].min_value;
     _max = AlpacaSwitch::_p_switch_devices[i].max_value;
     _stp = AlpacaSwitch::_p_switch_devices[i].step;
     _val = AlpacaSwitch::_p_switch_devices[i].value;
-    sprintf(sw_name, "Switch_%i", i);
+    sprintf(sw_name, "#Switch_%i", i);
     sprintf(sw_state, "%s, %s, min %i, max %i, step %i, value %i", AlpacaSwitch::_p_switch_devices[i].name, 
       (AlpacaSwitch::_p_switch_devices[i].can_write ? "RW" : "R"), _min, _max, _stp, _val);
     obj_states[sw_name] = sw_state;
